@@ -46,9 +46,9 @@ export default function DashboardPage() {
   return (
     <section className="space-y-6">
       <div className="space-y-1">
-        <p className="text-xs uppercase tracking-[0.2em] text-sky-300/90">Operations</p>
-        <h2 className="text-3xl font-bold text-white">Documents Dashboard</h2>
-        <p className="text-sm text-slate-400">Search, filter, sort, and track every document workflow.</p>
+        <p className="kicker">Operations</p>
+        <h2 className="title">Documents Dashboard</h2>
+        <p className="subtitle">Search, filter, sort, and track every document workflow.</p>
       </div>
 
       <div className="panel grid gap-3 p-4 md:grid-cols-4">
@@ -88,8 +88,8 @@ export default function DashboardPage() {
       </div>
 
       <div className="panel overflow-hidden">
-        <table className="w-full text-sm text-slate-200">
-          <thead className="bg-slate-900/80">
+        <table className="w-full text-sm text-slate-700">
+          <thead className="bg-slate-100">
             <tr>
               <th className="px-4 py-3 text-left font-semibold">File</th>
               <th className="px-4 py-3 text-left font-semibold">Status</th>
@@ -102,17 +102,17 @@ export default function DashboardPage() {
               docs.data.items.map((item) => {
                 const displayStatus = getDisplayStatus(item);
                 return (
-                <tr className="border-t border-slate-800/80 transition hover:bg-slate-800/30" key={item.id}>
+                <tr className="border-t border-slate-200 transition hover:bg-slate-50" key={item.id}>
                   <td className="px-4 py-3">
-                    <p className="font-medium text-white">{item.filename}</p>
-                    <p className="text-xs text-slate-400">{item.content_type}</p>
+                    <p className="font-medium text-slate-900">{item.filename}</p>
+                    <p className="text-xs text-slate-500">{item.content_type}</p>
                   </td>
                   <td className="px-4 py-3">
                     <StatusBadge status={displayStatus} />
                   </td>
-                  <td className="px-4 py-3 text-slate-300">{new Date(item.created_at).toLocaleString()}</td>
+                  <td className="px-4 py-3 text-slate-600">{new Date(item.created_at).toLocaleString()}</td>
                   <td className="px-4 py-3">
-                    <Link className="text-sky-300 transition hover:text-sky-200" href={`/documents/${item.id}`}>
+                    <Link className="text-sky-700 transition hover:text-sky-600" href={`/documents/${item.id}`}>
                       View Details
                     </Link>
                   </td>
@@ -120,8 +120,8 @@ export default function DashboardPage() {
               );
               })
             ) : (
-              <tr className="border-t border-slate-800/80">
-                <td className="px-4 py-8 text-center text-slate-400" colSpan={4}>
+              <tr className="border-t border-slate-200">
+                <td className="px-4 py-8 text-center text-slate-500" colSpan={4}>
                   {docs.isFetching ? "Loading documents..." : "No documents found for this filter."}
                 </td>
               </tr>
@@ -131,7 +131,7 @@ export default function DashboardPage() {
       </div>
 
       <div className="text-xs text-slate-500">
-        Total results: <span className="font-semibold text-slate-300">{docs.data?.total ?? 0}</span>
+        Total results: <span className="font-semibold text-slate-700">{docs.data?.total ?? 0}</span>
       </div>
     </section>
   );

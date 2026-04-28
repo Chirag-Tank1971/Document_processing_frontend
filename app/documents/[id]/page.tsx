@@ -155,25 +155,25 @@ export default function DocumentDetailPage() {
     <section className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <p className="text-xs uppercase tracking-[0.2em] text-sky-300/90">Document Detail</p>
-          <h2 className="text-2xl font-bold text-white">{doc.data.filename}</h2>
+          <p className="kicker">Document Detail</p>
+          <h2 className="text-2xl font-bold text-slate-900">{doc.data.filename}</h2>
         </div>
         <StatusBadge status={displayStatus} />
       </div>
 
       <div className="panel p-5">
         <div className="flex items-center justify-between gap-3">
-          <p className="text-sm font-medium text-slate-200">Live Progress</p>
-          <span className="text-xs text-slate-400">{progress?.progress ?? 0}%</span>
+          <p className="text-sm font-medium text-slate-700">Live Progress</p>
+          <span className="text-xs text-slate-500">{progress?.progress ?? 0}%</span>
         </div>
-        <p className="mt-1 text-sm text-slate-300">{progress?.step ?? "No events yet"}</p>
-        <div className="mt-3 h-2 overflow-hidden rounded-full bg-slate-800">
+        <p className="mt-1 text-sm text-slate-600">{progress?.step ?? "No events yet"}</p>
+        <div className="mt-3 h-2 overflow-hidden rounded-full bg-slate-200">
           <div
             className="h-full rounded-full bg-gradient-to-r from-blue-500 to-sky-400 transition-all duration-500"
             style={{ width: `${progress?.progress ?? 0}%` }}
           />
         </div>
-        <p className="mt-2 text-xs text-slate-400">{progress?.message ?? "Waiting for worker updates..."}</p>
+        <p className="mt-2 text-xs text-slate-500">{progress?.message ?? "Waiting for worker updates..."}</p>
       </div>
 
       <div className="panel grid gap-3 p-5">
@@ -217,14 +217,14 @@ export default function DocumentDetailPage() {
           Save Edits
         </button>
         <button
-          className="btn-muted border-emerald-500/30 bg-emerald-500/15 text-emerald-200 hover:bg-emerald-500/25"
+          className="btn-muted border-emerald-300 bg-emerald-50 text-emerald-700 hover:bg-emerald-100"
           disabled={doc.data.is_finalized || displayStatus !== "completed" || finalizeMutation.isPending}
           onClick={() => finalizeMutation.mutate()}
         >
           Finalize
         </button>
         <button
-          className="btn-muted border-amber-500/30 bg-amber-500/15 text-amber-200 hover:bg-amber-500/25"
+          className="btn-muted border-amber-300 bg-amber-50 text-amber-700 hover:bg-amber-100"
           disabled={displayStatus !== "failed" || retryMutation.isPending}
           onClick={() => retryMutation.mutate()}
         >
