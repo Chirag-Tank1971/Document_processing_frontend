@@ -6,7 +6,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { StatusBadge } from "@/components/status-badge";
 import { exportUrl, finalizeDocument, getDocument, progressUrl, retryDocument, updateDocument } from "@/lib/api";
-import { ProgressEvent } from "@/lib/types";
+import { DocumentStatus, ProgressEvent } from "@/lib/types";
 
 export default function DocumentDetailPage() {
   const params = useParams<{ id: string }>();
@@ -30,6 +30,7 @@ export default function DocumentDetailPage() {
         const parsed = JSON.parse(event.data) as ProgressEvent;
         setProgress(parsed);
         queryClient.invalidateQueries({ queryKey: ["document", id] });
+        queryClient.invalidateQueries({ queryKey: ["documents"] });
       } catch {
         // Ignore malformed events
       }
@@ -105,20 +106,48 @@ export default function DocumentDetailPage() {
         summary: form.summary,
         keywords: form.keywords.split(",").map((k) => k.trim()).filter(Boolean)
       }),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["document", id] })
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["document", id] });
+      queryClient.invalidateQueries({ queryKey: ["documents"] });
+    }
   });
 
   const finalizeMutation = useMutation({
     mutationFn: () => finalizeDocument(id),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["document", id] })
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["document", id] });
+      queryClient.invalidateQueries({ queryKey: ["documents"] });
+    }
   });
 
   const retryMutation = useMutation({
     mutationFn: () => retryDocument(id),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["document", id] })
+    onSuccess: async () => {
+      setProgress({
+        document_id: id,
+        job_id: "",
+        step: "queued",
+        progress: 5,
+        status: "queued",
+        message: "Retry queued",
+        timestamp: new Date().toISOString()
+      });
+      await queryClient.refetchQueries({ queryKey: ["document", id], type: "active" });
+      await queryClient.refetchQueries({ queryKey: ["documents"], type: "active" });
+    }
   });
 
   const isEditable = useMemo(() => !doc.data?.is_finalized, [doc.data?.is_finalized]);
+  const displayStatus = useMemo<DocumentStatus>(() => {
+    if (!doc.data) return "queued";
+    if (!progress) return doc.data.status;
+    const progressIsFresh = progress.document_id === doc.data.id;
+    if (!progressIsFresh) return doc.data.status;
+    if (doc.data.status === "failed" && (progress.status === "queued" || progress.status === "processing")) {
+      return progress.status;
+    }
+    return doc.data.status;
+  }, [doc.data, progress]);
 
   if (!doc.data) return <p className="text-sm text-slate-400">Loading document...</p>;
 
@@ -129,7 +158,7 @@ export default function DocumentDetailPage() {
           <p className="text-xs uppercase tracking-[0.2em] text-sky-300/90">Document Detail</p>
           <h2 className="text-2xl font-bold text-white">{doc.data.filename}</h2>
         </div>
-        <StatusBadge status={doc.data.status} />
+        <StatusBadge status={displayStatus} />
       </div>
 
       <div className="panel p-5">
@@ -189,14 +218,14 @@ export default function DocumentDetailPage() {
         </button>
         <button
           className="btn-muted border-emerald-500/30 bg-emerald-500/15 text-emerald-200 hover:bg-emerald-500/25"
-          disabled={doc.data.is_finalized || doc.data.status !== "completed" || finalizeMutation.isPending}
+          disabled={doc.data.is_finalized || displayStatus !== "completed" || finalizeMutation.isPending}
           onClick={() => finalizeMutation.mutate()}
         >
           Finalize
         </button>
         <button
           className="btn-muted border-amber-500/30 bg-amber-500/15 text-amber-200 hover:bg-amber-500/25"
-          disabled={doc.data.status !== "failed" || retryMutation.isPending}
+          disabled={displayStatus !== "failed" || retryMutation.isPending}
           onClick={() => retryMutation.mutate()}
         >
           Retry

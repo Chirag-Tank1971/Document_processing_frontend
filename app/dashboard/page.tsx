@@ -6,6 +6,19 @@ import { useMemo, useState } from "react";
 
 import { StatusBadge } from "@/components/status-badge";
 import { listDocuments } from "@/lib/api";
+import { DocumentItem, DocumentStatus } from "@/lib/types";
+
+const RETRY_GRACE_WINDOW_MS = 60_000;
+
+function getDisplayStatus(item: DocumentItem): DocumentStatus {
+  if (item.status !== "failed") return item.status;
+  const hasError = Boolean(item.error_message && item.error_message.trim().length > 0);
+  if (hasError) return "failed";
+  const updatedAtMs = new Date(item.updated_at).getTime();
+  if (Number.isNaN(updatedAtMs)) return "queued";
+  const isRecent = Date.now() - updatedAtMs <= RETRY_GRACE_WINDOW_MS;
+  return isRecent ? "queued" : "failed";
+}
 
 export default function DashboardPage() {
   const [search, setSearch] = useState("");
@@ -86,14 +99,16 @@ export default function DashboardPage() {
           </thead>
           <tbody>
             {docs.data?.items.length ? (
-              docs.data.items.map((item) => (
+              docs.data.items.map((item) => {
+                const displayStatus = getDisplayStatus(item);
+                return (
                 <tr className="border-t border-slate-800/80 transition hover:bg-slate-800/30" key={item.id}>
                   <td className="px-4 py-3">
                     <p className="font-medium text-white">{item.filename}</p>
                     <p className="text-xs text-slate-400">{item.content_type}</p>
                   </td>
                   <td className="px-4 py-3">
-                    <StatusBadge status={item.status} />
+                    <StatusBadge status={displayStatus} />
                   </td>
                   <td className="px-4 py-3 text-slate-300">{new Date(item.created_at).toLocaleString()}</td>
                   <td className="px-4 py-3">
@@ -102,7 +117,8 @@ export default function DashboardPage() {
                     </Link>
                   </td>
                 </tr>
-              ))
+              );
+              })
             ) : (
               <tr className="border-t border-slate-800/80">
                 <td className="px-4 py-8 text-center text-slate-400" colSpan={4}>
