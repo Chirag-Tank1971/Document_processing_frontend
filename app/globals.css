@@ -1,0 +1,32 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  @apply min-h-screen bg-slate-950 text-slate-100 antialiased;
+  background-image:
+    radial-gradient(at 20% 10%, rgba(59, 130, 246, 0.22) 0px, transparent 35%),
+    radial-gradient(at 80% 0%, rgba(56, 189, 248, 0.16) 0px, transparent 35%);
+}
+
+::selection {
+  @apply bg-sky-500/30 text-white;
+}
+
+@layer components {
+  .panel {
+    @apply rounded-2xl border border-slate-800/80 bg-slate-900/75 shadow-xl shadow-slate-950/30 backdrop-blur-sm;
+  }
+
+  .input-base {
+    @apply rounded-xl border border-slate-700 bg-slate-950/80 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20;
+  }
+
+  .btn-primary {
+    @apply rounded-xl bg-gradient-to-r from-blue-500 to-sky-500 px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-blue-900/30 transition hover:from-blue-400 hover:to-sky-400 disabled:cursor-not-allowed disabled:opacity-50;
+  }
+
+  .btn-muted {
+    @apply rounded-xl border border-slate-700 bg-slate-800/80 px-4 py-2 text-sm font-medium text-slate-100 transition hover:bg-slate-700 disabled:cursor-not-allowed disabled:opacity-50;
+  }
+}
